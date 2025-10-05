@@ -88,6 +88,7 @@ add_action(
 
 // Imports for internal classes.
 // We only import ModuleRegistry now; no built-in demo modules are registered.
+use Revmura\Suite\Models\Cpt\CptModule;
 use Revmura\Suite\Models\ModuleRegistry;
 use Revmura\Suite\Admin\ModulesPanel;
 
@@ -118,11 +119,12 @@ add_action(
 
 		// NOTE: No built-in demo modules are registered in Suite.
 		// To add modules, call: ModuleRegistry::register( new \Vendor\YourModule() );.
+		// Register internal modules **first**.
+		ModuleRegistry::register( new CptModule() );
 
 		// Boot enabled modules with gates + safe boot.
 		$enabled     = revmura_suite_get_enabled();
 		$all_modules = ModuleRegistry::all();
-
 		foreach ( $all_modules as $module ) {
 			$id = $module->id();
 			if ( ! in_array( $id, $enabled, true ) ) {
@@ -197,7 +199,7 @@ add_action(
 			);
 		}
 	},
-	20
+	30
 );
 
 // Handle POST from the Modules panel (save toggles + lifecycle).
