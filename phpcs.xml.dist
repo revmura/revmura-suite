@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<ruleset name="Revmura Suite">
+  <description>WordPress Coding Standards + PHPCompatibility for Suite</description>
+
+  <file>revmura-suite.php</file>
+  <file>src</file>
+
+  <exclude-pattern>vendor/*</exclude-pattern>
+  <exclude-pattern>node_modules/*</exclude-pattern>
+
+  <config name="testVersion" value="8.3-"/>
+
+  <rule ref="WordPress-Core">
+    <exclude name="WordPress.Files.FileName"/>
+  </rule>
+  <rule ref="WordPress-Docs"/>
+  <rule ref="WordPress-Extra">
+    <exclude name="WordPress.Files.FileName"/>
+  </rule>
+
+  <rule ref="PHPCompatibilityWP"/>
+
+  <config name="text_domain" value="revmura"/>
+</ruleset>
