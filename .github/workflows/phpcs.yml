@@ -1,8 +1,5 @@
 name: PHPCS
-on:
-  push:
-  pull_request:
-
+on: [push, pull_request]
 jobs:
   phpcs:
     runs-on: ubuntu-latest
