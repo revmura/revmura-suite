@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const REVMURA_SUITE_VER     = '0.1.0';
 const REVMURA_SUITE_OPT     = 'revmura_modules_enabled';
 const REVMURA_SUITE_VER_OPT = 'revmura_module_versions';
-const REVMURA_SUITE_CAP     = 'manage_options'; // Simple; can be custom later.
+const REVMURA_SUITE_CAP     = 'manage_options';
 
 /**
  * Get enabled module ids (sanitized).
@@ -87,8 +87,8 @@ add_action(
 );
 
 // Imports for internal classes.
+// We only import ModuleRegistry now; no built-in demo modules are registered.
 use Revmura\Suite\Models\ModuleRegistry;
-use Revmura\Suite\Models\Hello\HelloModule;
 use Revmura\Suite\Admin\ModulesPanel;
 
 // Healthy boot flag (optional for MU tools).
@@ -101,7 +101,7 @@ add_action(
 	}
 );
 
-// Register built-in modules and boot enabled ones with compatibility checks.
+// Register modules (none by default) and boot enabled ones with compatibility checks.
 add_action(
 	'plugins_loaded',
 	static function (): void {
@@ -116,8 +116,8 @@ add_action(
 			return;
 		}
 
-		// Register internal modules here.
-		ModuleRegistry::register( new HelloModule() );
+		// NOTE: No built-in demo modules are registered in Suite.
+		// To add modules, call: ModuleRegistry::register( new \Vendor\YourModule() );.
 
 		// Boot enabled modules with gates + safe boot.
 		$enabled     = revmura_suite_get_enabled();
