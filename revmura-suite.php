@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Revmura Suite
  * Description: Modules bundle for Revmura. Loads internal modules and provides a Manager tab to enable/disable them.
- * Version: 0.1.0
+ * Version: 1.0.0
  * Requires at least: 6.5
  * Requires PHP: 8.3
  * Requires Plugins: revmura-power-core, revmura-manager
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const REVMURA_SUITE_VER     = '0.1.0';
+const REVMURA_SUITE_VER     = '1.0.0';
 const REVMURA_SUITE_OPT     = 'revmura_modules_enabled';
 const REVMURA_SUITE_VER_OPT = 'revmura_module_versions';
 const REVMURA_SUITE_CAP     = 'manage_options';
@@ -213,7 +213,7 @@ add_action(
 			);
 		}
 	},
-	30
+	20
 );
 
 // Handle POST from the Modules panel (save toggles + lifecycle).
