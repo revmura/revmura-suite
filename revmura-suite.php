@@ -87,8 +87,6 @@ add_action(
 );
 
 // Imports for internal classes.
-// We only import ModuleRegistry now; no built-in demo modules are registered.
-use Revmura\Suite\Models\Cpt\CptModule;
 use Revmura\Suite\Models\ModuleRegistry;
 use Revmura\Suite\Admin\ModulesPanel;
 
@@ -102,7 +100,7 @@ add_action(
 	}
 );
 
-// Register modules (none by default) and boot enabled ones with compatibility checks.
+// Register modules (auto-load from config/filter) and boot enabled ones with compatibility checks.
 add_action(
 	'plugins_loaded',
 	static function (): void {
@@ -117,14 +115,30 @@ add_action(
 			return;
 		}
 
-		// NOTE: No built-in demo modules are registered in Suite.
-		// To add modules, call: ModuleRegistry::register( new \Vendor\YourModule() );.
-		// Register internal modules **first**.
-		ModuleRegistry::register( new CptModule() );
+		// 1) Collect module classes from config file.
+		$classes = array();
+		$config  = __DIR__ . '/config/modules.php';
+		if ( is_readable( $config ) ) {
+			$cfg = include $config;
+			if ( is_array( $cfg ) ) {
+				$classes = array_merge( $classes, $cfg );
+			}
+		}
 
-		// Boot enabled modules with gates + safe boot.
+		// 2) Allow external code to contribute classes.
+		$classes = apply_filters( 'revmura_suite_modules', $classes );
+
+		// 3) Register classes.
+		foreach ( $classes as $class ) {
+			if ( is_string( $class ) && class_exists( $class ) ) {
+				ModuleRegistry::register( new $class() );
+			}
+		}
+
+		// 4) Boot enabled modules with gates + safe boot.
 		$enabled     = revmura_suite_get_enabled();
 		$all_modules = ModuleRegistry::all();
+
 		foreach ( $all_modules as $module ) {
 			$id = $module->id();
 			if ( ! in_array( $id, $enabled, true ) ) {
