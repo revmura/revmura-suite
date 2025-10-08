@@ -1,34 +1,24 @@
 {
-  "name": "revmura/revmura-suite",
-  "description": "Revmura module bundle (loader + Manager panel).",
-  "type": "wordpress-plugin",
-  "license": "GPL-2.0-or-later",
-
+  "name": "itc/revmura-suite",
   "require": {},
-
   "autoload": {
     "psr-4": {
       "Revmura\\Suite\\": "src/"
     }
   },
-
   "require-dev": {
-    "squizlabs/php_codesniffer": "^3.9",
-    "wp-coding-standards/wpcs": "^3.0",
+    "squizlabs/php_codesniffer": "^3.10",
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
     "phpcompatibility/php-compatibility": "^9.3",
-    "phpcompatibility/phpcompatibility-wp": "^2.1",
-    "dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+    "wp-coding-standards/wpcs": "^3.1"
+  },
+  "scripts": {
+    "lint": "vendor/bin/phpcs -p -s --standard=phpcs.xml.dist .",
+    "lint:fix": "vendor/bin/phpcbf -p -s --standard=phpcs.xml.dist ."
   },
   "config": {
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true
     }
-  },
-  "scripts": {
-    "phpcs": "phpcs -q",
-    "phpcbf": "phpcbf"
-  },
-  "extra": {
-    "phpcodesniffer-standard": "WordPress"
   }
 }

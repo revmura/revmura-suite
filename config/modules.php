@@ -11,5 +11,5 @@ declare(strict_types=1);
 
 return array(
 	'Revmura\Suite\Models\Cpt\CptModule',
-	'Revmura\Suite\Models\Multilang\Multilang\MultilangModule',
+	'Revmura\Suite\Models\Multilang\MultilangModule',
 );

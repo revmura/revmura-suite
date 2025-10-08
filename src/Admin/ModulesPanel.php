@@ -112,9 +112,9 @@ final class ModulesPanel {
 
 		check_admin_referer( 'revmura_modules_save', '_revmura_modules_nonce' );
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified via check_admin_referer above.
-		$mods = isset( $_POST['modules'] ) ? (array) wp_unslash( $_POST['modules'] ) : array();
-		$mods = array_map( 'sanitize_key', $mods );
+		// Read and sanitize strictly (array of slugs/ids).
+		$mods = filter_input( INPUT_POST, 'modules', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized next line
+		$mods = is_array( $mods ) ? array_map( 'sanitize_key', wp_unslash( $mods ) ) : array();
 
 		$prev = function_exists( '\revmura_suite_get_enabled' ) ? \revmura_suite_get_enabled() : array();
 		update_option( REVMURA_SUITE_OPT, $mods, false );

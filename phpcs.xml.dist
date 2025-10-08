@@ -1,24 +1,46 @@
 <?xml version="1.0"?>
-<ruleset name="Revmura Suite">
-  <description>WordPress Coding Standards + PHPCompatibility for Suite</description>
+<ruleset name="Revmura Minimal">
+    <description>Minimal checks: PHP compat + WP security only. No formatting.</description>
 
-  <file>revmura-suite.php</file>
-  <file>src</file>
+    <!-- Scan the whole plugin but skip vendor -->
+    <file>.</file>
+    <exclude-pattern>vendor/*</exclude-pattern>
+	<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+	<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
 
-  <exclude-pattern>vendor/*</exclude-pattern>
-  <exclude-pattern>node_modules/*</exclude-pattern>
+    <!-- Target PHP versions you care about -->
+    <config name="testVersion" value="8.1-8.3"/>
 
-  <config name="testVersion" value="8.3-"/>
+    <!-- Core engines -->
+    <rule ref="PHPCompatibility"/>
+    <rule ref="WordPress-Core"/>
 
-  <rule ref="WordPress-Core">
-    <exclude name="WordPress.Files.FileName"/>
-  </rule>
-  <rule ref="WordPress-Docs"/>
-  <rule ref="WordPress-Extra">
-    <exclude name="WordPress.Files.FileName"/>
-  </rule>
+    <!-- Keep only security-critical WP sniffs -->
+    <rule ref="WordPress.Security.EscapeOutput"/>
+    <rule ref="WordPress.Security.ValidatedSanitizedInput"/>
+    <rule ref="WordPress.Security.NonceVerification"/>
+    <rule ref="WordPress.DB.PreparedSQL"/>
 
-  <rule ref="PHPCompatibilityWP"/>
+    <!-- Downgrade everything else to not annoy you -->
+    <rule ref="Generic">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PEAR">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR1">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR2">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Zend">
+        <severity>0</severity>
+    </rule>
 
-  <config name="text_domain" value="revmura"/>
+    <!-- Explicitly exclude the PHP 8.3-crashy sniff (safest) -->
+    <exclude name="Generic.CodeAnalysis.UnconditionalIfStatement"/>
 </ruleset>

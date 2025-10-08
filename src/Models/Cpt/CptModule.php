@@ -1,7 +1,6 @@
 <?php
 /**
  * CPT & Tax module (Suite)
- * CPT & Tax module (Suite)
  *
  * @package Revmura\Suite
  */
@@ -14,45 +13,50 @@ namespace Revmura\Suite\Models\Cpt;
 
 use Revmura\Suite\Models\Contracts\ModuleInterface;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
- * Module that manages CPT & Taxonomy schema (create/edit/export/import/delete)
- * and registers them at runtime from a stored snapshot.
+ * CPT & Tax module (Suite).
+ *
+ * Provides quick builder, import/export, and live apply via Core.
  *
  * @since 1.0.0
  */
 final class CptModule implements ModuleInterface {
 
 	/**
-	 * Get the module ID.
+	 * Module unique ID.
 	 *
-	 * @return string Module slug.
+	 * @return string
 	 */
 	public function id(): string {
 		return 'cpt';
 	}
 
 	/**
-	 * Get the human-readable module label.
+	 * Human-readable label.
 	 *
-	 * @return string Translated label.
+	 * @return string
 	 */
 	public function label(): string {
 		return __( 'CPT & Tax', 'revmura' );
 	}
 
 	/**
-	 * Get the module version.
+	 * Module version.
 	 *
-	 * @return string SemVer string.
+	 * @return string
 	 */
 	public function version(): string {
 		return '1.0.0';
 	}
 
 	/**
-	 * Minimum compatible Revmura Core API version.
+	 * MMinimum required Core API version.
 	 *
-	 * @return string SemVer string.
+	 * @return string
 	 */
 	public function required_core_api_min(): string {
 		return '1.0.0';
@@ -61,16 +65,16 @@ final class CptModule implements ModuleInterface {
 	/**
 	 * Minimum required WordPress version.
 	 *
-	 * @return string WP version string.
+	 * @return string
 	 */
 	public function required_wp_min(): string {
 		return '6.5';
 	}
 
 	/**
-	 * Minimum required PHP version.
+	 * “Minimum required PHP version.
 	 *
-	 * @return string PHP version string.
+	 * @return string
 	 */
 	public function required_php_min(): string {
 		return '8.3';
@@ -82,7 +86,6 @@ final class CptModule implements ModuleInterface {
 	 * @return void
 	 */
 	public function boot(): void {
-		// Register Manager panel (via Manager hook). Use init (i18n timing).
 		// Register Manager panel (via Manager hook). Use init (i18n timing).
 		add_action(
 			'init',
@@ -127,7 +130,7 @@ final class CptModule implements ModuleInterface {
 	}
 
 	/**
-	 * Render the Manager panel UI (create/edit/export/import/delete).
+	 * Manager panel UI (create/edit/export/import/delete).
 	 *
 	 * @return void
 	 */
@@ -165,7 +168,7 @@ final class CptModule implements ModuleInterface {
 			'capability_type' => 'post',
 			'menu_icon'       => 'dashicons-admin-post',
 			'menu_position'   => 26,
-			// A single linked tax (simple UI); first tax found is used.
+			// a single linked tax (simple UI); first tax found is used.
 			'tax_slug'        => '',
 			'tax_label'       => '',
 			'tax_rewrite'     => '',
@@ -190,22 +193,7 @@ final class CptModule implements ModuleInterface {
 		echo '<div class="wrap">';
 		echo '<h2>' . esc_html__( 'CPT & Tax (via Core Importer)', 'revmura' ) . '</h2>';
 		echo '<p>' . esc_html__( 'Use this quick form to create or edit a CPT (and one linked taxonomy), preview JSON, and Save & Register. You can also Export/Import JSON, or Delete the current CPT.', 'revmura' ) . '</p>';
-
-		// Existing CPT selector.
-		echo '<div class="card" style="max-width:900px;padding:16px;margin-bottom:12px">';
-		echo '<h3>' . esc_html__( 'Choose CPT to edit (or select “(new)”)', 'revmura' ) . '</h3>';
-		echo '<select id="revmura-cpt-select" class="regular-text">';
-		echo '<option value="">' . esc_html__( '(new)', 'revmura' ) . '</option>';
-		foreach ( $cpts as $slug => $cfg ) {
-			$label = is_array( $cfg ) ? (string) ( $cfg['label'] ?? $slug ) : (string) $slug;
-			echo '<option value="' . esc_attr( (string) $slug ) . '">' . esc_html( $label . ' (' . $slug . ')' ) . '</option>';
-		}
-		echo '</select>';
-		echo '</div>';
-		// Render.
-		echo '<div class="wrap">';
-		echo '<h2>' . esc_html__( 'CPT & Tax (via Core Importer)', 'revmura' ) . '</h2>';
-		echo '<p>' . esc_html__( 'Use this quick form to create or edit a CPT (and one linked taxonomy), preview JSON, and Save & Register. You can also Export/Import JSON, or Delete the current CPT.', 'revmura' ) . '</p>';
+		echo '<div id="revmura-cpt-notices" style="margin:12px 0"></div>';
 
 		// Existing CPT selector.
 		echo '<div class="card" style="max-width:900px;padding:16px;margin-bottom:12px">';
@@ -320,187 +308,15 @@ final class CptModule implements ModuleInterface {
 			const deleteNonce = '<?php echo esc_js( $delete_nonce ); ?>';
 			const db = <?php echo $db_js; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
 
-			const els = {
-				select: document.getElementById('revmura-cpt-select'),
-				slug: document.getElementById('revmura-cpt-slug'),
-				label: document.getElementById('revmura-cpt-label'),
-				rew: document.getElementById('revmura-rewrite-slug'),
-				supTitle: document.getElementById('sup-title'),
-				supEditor: document.getElementById('sup-editor'),
-				supThumb: document.getElementById('sup-thumb'),
-				supRevs: document.getElementById('sup-revs'),
-				optArchive: document.getElementById('opt-archive'),
-				optHier: document.getElementById('opt-hier'),
-				optMeta: document.getElementById('opt-meta'),
-				menuIcon: document.getElementById('revmura-menu-icon'),
-				menuPos: document.getElementById('revmura-menu-pos'),
-				capType: document.getElementById('revmura-cap-type'),
-				taxSlug: document.getElementById('revmura-tax-slug'),
-				taxLabel: document.getElementById('revmura-tax-label'),
-				taxRew: document.getElementById('revmura-tax-rewrite'),
-				taxHier: document.getElementById('revmura-tax-hier'),
-				jsonTa: document.getElementById('revmura-cpt-json'),
-				btnDelete: document.getElementById('revmura-cpt-delete'),
-			};
-
-			function arrayHas(arr, val){ return Array.isArray(arr) && arr.indexOf(val) !== -1; }
-
-			function loadFromSlug(slug) {
-				// Reset defaults first.
-				els.slug.value = slug || '';
-				els.label.value = '';
-				els.rew.value = '';
-				els.supTitle.checked = true;
-				els.supEditor.checked = true;
-				els.supThumb.checked = true;
-				els.supRevs.checked = true;
-				els.optArchive.checked = false;
-				els.optHier.checked = false;
-				els.optMeta.checked = false;
-				els.capType.value = 'post';
-				els.menuIcon.value = 'dashicons-admin-post';
-				els.menuPos.value = '26';
-				els.taxSlug.value = '';
-				els.taxLabel.value = '';
-				els.taxRew.value = '';
-				els.taxHier.checked = false;
-
-				if (!slug || !db.cpts || !db.cpts[slug]) {
-					renderPreview();
-					return;
+			function showNotice(kind, text) {
+				const box = document.getElementById('revmura-cpt-notices');
+				if (!box) { console.log(text); return; }
+				const cls = kind === 'success' ? 'notice notice-success is-dismissible' : 'notice notice-error is-dismissible';
+				box.innerHTML = `<div class="${cls}"><p>${text}</p></div>`;
+				if (kind === 'success') {
+					setTimeout(() => { if (box.innerHTML) box.innerHTML = ''; }, 3000);
 				}
-				const cfg = db.cpts[slug];
-				els.label.value = (cfg.label || slug);
-				els.rew.value = (cfg.rewrite && cfg.rewrite.slug) ? cfg.rewrite.slug : slug;
-
-				const supports = (cfg.supports || []);
-				els.supTitle.checked = arrayHas(supports, 'title');
-				els.supEditor.checked = arrayHas(supports, 'editor');
-				els.supThumb.checked  = arrayHas(supports, 'thumbnail');
-				els.supRevs.checked   = arrayHas(supports, 'revisions');
-
-				els.optArchive.checked = !!cfg.has_archive;
-				els.optHier.checked    = !!cfg.hierarchical;
-				els.optMeta.checked    = !!cfg.map_meta_cap;
-				els.capType.value      = (cfg.capability_type || 'post');
-				els.menuIcon.value     = (cfg.menu_icon || 'dashicons-admin-post');
-				els.menuPos.value      = String(cfg.menu_position != null ? cfg.menu_position : 26);
-
-				// First tax pointing to this CPT.
-				if (Array.isArray(db.taxes)) {
-					for (const t of db.taxes) {
-						if (t && Array.isArray(t.object_types) && t.object_types.indexOf(slug) !== -1) {
-							els.taxSlug.value  = t.slug || '';
-							els.taxLabel.value = t.label || '';
-							els.taxRew.value   = (t.rewrite && t.rewrite.slug) ? t.rewrite.slug : (t.slug || '');
-							els.taxHier.checked= !!t.hierarchical;
-							break;
-						}
-					}
-				}
-
-				renderPreview();
 			}
-		// Builder/edit form.
-		?>
-		<div class="card" style="max-width:900px;padding:16px;">
-			<table class="form-table" role="presentation">
-				<tbody>
-					<tr>
-						<th scope="row"><label for="revmura-cpt-slug"><?php esc_html_e( 'CPT Slug', 'revmura' ); ?></label></th>
-						<td><input id="revmura-cpt-slug" type="text" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. offer', 'revmura' ); ?>" value="<?php echo esc_attr( $prefill['slug'] ); ?>"></td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="revmura-cpt-label"><?php esc_html_e( 'CPT Label', 'revmura' ); ?></label></th>
-						<td><input id="revmura-cpt-label" type="text" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. Offers', 'revmura' ); ?>" value="<?php echo esc_attr( $prefill['label'] ); ?>"></td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="revmura-rewrite-slug"><?php esc_html_e( 'Rewrite Slug', 'revmura' ); ?></label></th>
-						<td><input id="revmura-rewrite-slug" type="text" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. offers', 'revmura' ); ?>" value="<?php echo esc_attr( $prefill['rewrite_slug'] ); ?>"></td>
-					</tr>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Supports', 'revmura' ); ?></th>
-						<td>
-							<label><input type="checkbox" id="sup-title" <?php checked( $prefill['supports']['title'] ); ?>> <?php esc_html_e( 'Title', 'revmura' ); ?></label><br>
-							<label><input type="checkbox" id="sup-editor" <?php checked( $prefill['supports']['editor'] ); ?>> <?php esc_html_e( 'Editor', 'revmura' ); ?></label><br>
-							<label><input type="checkbox" id="sup-thumb" <?php checked( $prefill['supports']['thumbnail'] ); ?>> <?php esc_html_e( 'Featured Image', 'revmura' ); ?></label><br>
-							<label><input type="checkbox" id="sup-revs" <?php checked( $prefill['supports']['revisions'] ); ?>> <?php esc_html_e( 'Revisions', 'revmura' ); ?></label>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'CPT Options', 'revmura' ); ?></th>
-						<td>
-							<label><input type="checkbox" id="opt-archive" <?php checked( $prefill['has_archive'] ); ?>> <?php esc_html_e( 'Has archive', 'revmura' ); ?></label><br>
-							<label><input type="checkbox" id="opt-hier" <?php checked( $prefill['hierarchical'] ); ?>> <?php esc_html_e( 'Hierarchical', 'revmura' ); ?></label><br>
-							<label><input type="checkbox" id="opt-meta" <?php checked( $prefill['map_meta_cap'] ); ?>> <?php esc_html_e( 'Map meta caps', 'revmura' ); ?></label>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="revmura-menu-icon"><?php esc_html_e( 'Menu Icon (dashicon or URL)', 'revmura' ); ?></label></th>
-						<td><input id="revmura-menu-icon" type="text" class="regular-text" value="<?php echo esc_attr( $prefill['menu_icon'] ); ?>"></td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="revmura-menu-pos"><?php esc_html_e( 'Menu Position', 'revmura' ); ?></label></th>
-						<td><input id="revmura-menu-pos" type="number" class="small-text" value="<?php echo esc_attr( (string) $prefill['menu_position'] ); ?>"></td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="revmura-cap-type"><?php esc_html_e( 'Capability Type', 'revmura' ); ?></label></th>
-						<td><input id="revmura-cap-type" type="text" class="regular-text" value="<?php echo esc_attr( $prefill['capability_type'] ); ?>"></td>
-					</tr>
-
-					<tr><th colspan="2"><hr></th></tr>
-
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Optional Taxonomy', 'revmura' ); ?></th>
-						<td>
-							<label for="revmura-tax-slug"><?php esc_html_e( 'Tax Slug', 'revmura' ); ?></label>
-							<input id="revmura-tax-slug" type="text" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. offer_cat', 'revmura' ); ?>" value="<?php echo esc_attr( $prefill['tax_slug'] ); ?>"><br><br>
-							<label for="revmura-tax-label"><?php esc_html_e( 'Tax Label', 'revmura' ); ?></label>
-							<input id="revmura-tax-label" type="text" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. Offer Categories', 'revmura' ); ?>" value="<?php echo esc_attr( $prefill['tax_label'] ); ?>"><br><br>
-							<label for="revmura-tax-rewrite"><?php esc_html_e( 'Tax Rewrite', 'revmura' ); ?></label>
-							<input id="revmura-tax-rewrite" type="text" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. offer-category', 'revmura' ); ?>" value="<?php echo esc_attr( $prefill['tax_rewrite'] ); ?>"><br><br>
-							<label><input type="checkbox" id="revmura-tax-hier" <?php checked( $prefill['tax_hier'] ); ?>> <?php esc_html_e( 'Hierarchical', 'revmura' ); ?></label>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-
-			<details style="margin-top:10px;">
-				<summary><strong><?php esc_html_e( 'Preview JSON', 'revmura' ); ?></strong></summary>
-				<textarea id="revmura-cpt-json" rows="12" style="width:100%;"></textarea>
-			</details>
-
-			<p style="margin-top:10px;">
-				<button class="button button-primary" id="revmura-cpt-apply"><?php esc_html_e( 'Save & Register', 'revmura' ); ?></button>
-				<button class="button" id="revmura-cpt-export"><?php esc_html_e( 'Export this CPT', 'revmura' ); ?></button>
-				<button class="button button-link-delete" id="revmura-cpt-delete"><?php esc_html_e( 'Delete this CPT', 'revmura' ); ?></button>
-				<input type="file" id="revmura-cpt-import-file" accept="application/json">
-				<button class="button" id="revmura-cpt-import"><?php esc_html_e( 'Import JSON', 'revmura' ); ?></button>
-			</p>
-		</div>
-		<?php
-		// JS helpers.
-		$db_js = wp_json_encode(
-			array(
-				'cpts'  => $cpts,
-				'taxes' => $taxes,
-			),
-			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
-		);
-		if ( ! is_string( $db_js ) ) {
-			$db_js = '{"cpts":{},"taxes":[]}';
-		}
-		?>
-		<script>
-		(() => {
-			const postUrl     = '<?php echo esc_url( $post_url ); ?>';
-			const applyAction = 'revmura_cpt_apply';
-			const exportAction= 'revmura_cpt_export_one';
-			const deleteAction= 'revmura_cpt_delete';
-			const applyNonce  = '<?php echo esc_js( $apply_nonce ); ?>';
-			const exportNonce = '<?php echo esc_js( $export_nonce ); ?>';
-			const deleteNonce = '<?php echo esc_js( $delete_nonce ); ?>';
-			const db = <?php echo $db_js; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
 
 			const els = {
 				select: document.getElementById('revmura-cpt-select'),
@@ -661,9 +477,22 @@ final class CptModule implements ModuleInterface {
 				const text = await res.text();
 				let data;
 				try { data = JSON.parse(text); } catch { data = { ok:false, error:text }; }
-				alert(JSON.stringify(data, null, 2));
-				// After save, reload to refresh selector/options.
-				if (data && data.ok) window.location.reload();
+
+				if (data && data.ok) {
+					const slug = Object.keys(obj.cpts)[0];
+					let opt = Array.from(els.select.options).find(o => o.value === slug);
+					if (!opt) {
+						opt = document.createElement('option');
+						opt.value = slug;
+						opt.text = (els.label.value || slug) + ' (' + slug + ')';
+						els.select.appendChild(opt);
+					}
+					els.select.value = slug;
+					showNotice('success', '<?php echo esc_js( __( 'Saved & registered.', 'revmura' ) ); ?>');
+				} else {
+					const err = (data && data.error) ? data.error : 'Unknown error';
+					showNotice('error', '<?php echo esc_js( __( 'Save failed:', 'revmura' ) ); ?> ' + err);
+				}
 				return data;
 			}
 
@@ -671,7 +500,7 @@ final class CptModule implements ModuleInterface {
 				e.preventDefault();
 				const obj = buildSchema();
 				if (!Object.keys(obj.cpts).length) {
-					alert('Please enter a CPT slug and label.');
+					showNotice('error', '<?php echo esc_js( __( 'Please enter a CPT slug and label.', 'revmura' ) ); ?>');
 					return;
 				}
 				await applySchema(obj);
@@ -680,7 +509,7 @@ final class CptModule implements ModuleInterface {
 			document.getElementById('revmura-cpt-export').addEventListener('click', (e) => {
 				e.preventDefault();
 				const slug = (els.slug.value || '').trim();
-				if (!slug) { alert('Enter the CPT slug first.'); return; }
+				if (!slug) { showNotice('error', '<?php echo esc_js( __( 'Enter the CPT slug first.', 'revmura' ) ); ?>'); return; }
 				const url = `${postUrl}?action=${exportAction}&_wpnonce=${encodeURIComponent(exportNonce)}&slug=${encodeURIComponent(slug)}`;
 				window.location.href = url;
 			});
@@ -688,20 +517,60 @@ final class CptModule implements ModuleInterface {
 			document.getElementById('revmura-cpt-import').addEventListener('click', async (e) => {
 				e.preventDefault();
 				const f = document.getElementById('revmura-cpt-import-file').files[0];
-				if (!f) { alert('Choose a JSON file.'); return; }
+				if (!f) { showNotice('error', '<?php echo esc_js( __( 'Choose a JSON file.', 'revmura' ) ); ?>'); return; }
 				const text = await f.text();
 				let obj;
-				try { obj = JSON.parse(text); } catch { alert('Invalid JSON.'); return; }
+				try { obj = JSON.parse(text); } catch { showNotice('error', '<?php echo esc_js( __( 'Invalid JSON.', 'revmura' ) ); ?>'); return; }
 				await applySchema(obj);
 			});
 
-			els.btnDelete.addEventListener('click', (e) => {
+			els.btnDelete.addEventListener('click', async (e) => {
 				e.preventDefault();
 				const slug = (els.slug.value || '').trim();
-				if (!slug) { alert('No CPT slug to delete.'); return; }
-				if (!confirm(`Delete CPT "${slug}"? Linked taxes will be updated.`)) return;
+				if (!slug) { showNotice('error', '<?php echo esc_js( __( 'No CPT slug to delete.', 'revmura' ) ); ?>'); return; }
+				if (!confirm(`<?php
+					// translators: %s: CPT slug
+					echo esc_js( __( 'Delete CPT "%s"? Linked taxes will be updated.', 'revmura' ) );
+				?>`.replace('%s', slug))) return;
 				const url = `${postUrl}?action=${deleteAction}&_wpnonce=${encodeURIComponent(deleteNonce)}&slug=${encodeURIComponent(slug)}`;
-				window.location.href = url;
+				try {
+					const res = await fetch(url, { credentials: 'same-origin' });
+					const text = await res.text();
+					let data; try { data = JSON.parse(text); } catch { data = { ok:false, error:text }; }
+
+					if (data && data.ok) {
+						const removeOpt = Array.from(els.select.options).find(o => o.value === slug);
+						if (removeOpt) removeOpt.remove();
+						els.select.value = '';
+						// Reset form to defaults
+						(function reset() {
+							els.slug.value = '';
+							els.label.value = '';
+							els.rew.value = '';
+							els.supTitle.checked = true;
+							els.supEditor.checked = true;
+							els.supThumb.checked = true;
+							els.supRevs.checked = true;
+							els.optArchive.checked = false;
+							els.optHier.checked = false;
+							els.optMeta.checked = false;
+							els.capType.value = 'post';
+							els.menuIcon.value = 'dashicons-admin-post';
+							els.menuPos.value = '26';
+							els.taxSlug.value = '';
+							els.taxLabel.value = '';
+							els.taxRew.value = '';
+							els.taxHier.checked = false;
+							renderPreview();
+						})();
+						showNotice('success', '<?php echo esc_js( __( 'CPT deleted and rewrites flushed.', 'revmura' ) ); ?>');
+					} else {
+						const err = (data && data.error) ? data.error : 'Unknown error';
+						showNotice('error', '<?php echo esc_js( __( 'Delete failed:', 'revmura' ) ); ?> ' + err);
+					}
+				} catch (err) {
+					showNotice('error', '<?php echo esc_js( __( 'Delete request failed.', 'revmura' ) ); ?>');
+				}
 			});
 		})();
 		</script>
@@ -710,12 +579,12 @@ final class CptModule implements ModuleInterface {
 	}
 
 	/**
-	 * Fill the prefill array from a given CPT and its first linked taxonomy.
+	 * Fill prefill array from a given CPT + first linked tax.
 	 *
-	 * @param array<string,mixed> $prefill Prefill (by reference).
-	 * @param array<string,mixed> $cpts    CPTs map.
-	 * @param array<int,mixed>    $taxes   Taxonomies list.
-	 * @param string              $slug    CPT slug to load.
+	 * @param array<string,mixed> $prefill Prefill (by ref).
+	 * @param array<string,mixed> $cpts CPTs map.
+	 * @param array<int,mixed>    $taxes Taxes list.
+	 * @param string              $slug CPT slug to load.
 	 * @return void
 	 */
 	private static function fill_from_cpt_and_tax( array &$prefill, array $cpts, array $taxes, string $slug ): void {
@@ -752,7 +621,7 @@ final class CptModule implements ModuleInterface {
 	}
 
 	/**
-	 * Handle "Save & Register": persist schema, write LKG, register now, flush.
+	 * Save & Register (writes option, LKG, registers now, flush).
 	 *
 	 * @return void
 	 */
@@ -767,7 +636,10 @@ final class CptModule implements ModuleInterface {
 			);
 		}
 
-		$nonce = isset( $_SERVER['HTTP_X_REVMURA_NONCE'] ) ? (string) $_SERVER['HTTP_X_REVMURA_NONCE'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- validated by wp_verify_nonce
+		// Custom header for JSON POST from Manager panel.
+		$nonce = isset( $_SERVER['HTTP_X_REVMURA_NONCE'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REVMURA_NONCE'] ) )
+			: '';
 		if ( ! is_string( $nonce ) || ! wp_verify_nonce( $nonce, 'revmura_cpt_apply' ) ) {
 			wp_send_json(
 				array(
@@ -778,9 +650,8 @@ final class CptModule implements ModuleInterface {
 			);
 		}
 
-		// Read JSON request body.
-		$raw  = (string) file_get_contents( 'php://input' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- reading JSON request body.
-		$data = json_decode( $raw, true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.json_decode_json_decode
+		$raw  = (string) file_get_contents( 'php://input' );
+		$data = json_decode( $raw, true );
 		if ( ! is_array( $data ) ) {
 			wp_send_json(
 				array(
@@ -832,7 +703,7 @@ final class CptModule implements ModuleInterface {
 	}
 
 	/**
-	 * Export a single CPT and its linked taxes as a JSON download.
+	 * Export a single CPT + its linked taxes as JSON download.
 	 *
 	 * @return void
 	 */
@@ -882,27 +753,38 @@ final class CptModule implements ModuleInterface {
 		}
 
 		nocache_headers();
-		header( 'Content-Type: application/json; charset=utf-8' ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_headers, WordPressVIPMinimum.Headers.HeaderManipulation
-		header( 'Content-Disposition: attachment; filename="cpt-' . $slug . '.json"' ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_headers, WordPressVIPMinimum.Headers.HeaderManipulation
+		header( 'Content-Type: application/json; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename="cpt-' . $slug . '.json"' );
 		echo $json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		exit;
 	}
 
 	/**
-	 * Delete a CPT and clean linked taxes (remove CPT from object_types; drop empty taxes).
-	 * Flush rewrite rules afterwards.
+	 * Delete a CPT and clean linked taxes (remove CPT from object_types; drop empty taxes). Flush. Returns JSON.
 	 *
 	 * @return void
 	 */
 	public static function handle_delete_cpt(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Access denied', 'revmura' ) );
+			wp_send_json(
+				array(
+					'ok'    => false,
+					'error' => 'forbidden',
+				),
+				403
+			);
 		}
 		check_admin_referer( 'revmura_cpt_delete' );
 
 		$slug = isset( $_GET['slug'] ) ? sanitize_key( wp_unslash( (string) $_GET['slug'] ) ) : '';
 		if ( '' === $slug ) {
-			wp_die( esc_html__( 'Missing CPT slug.', 'revmura' ) );
+			wp_send_json(
+				array(
+					'ok'    => false,
+					'error' => 'missing_slug',
+				),
+				400
+			);
 		}
 
 		$schema = get_option(
@@ -930,7 +812,7 @@ final class CptModule implements ModuleInterface {
 			$objs = (array) ( $tax['object_types'] ?? array() );
 			$objs = array_values( array_filter( $objs, static fn( $o ) => (string) $o !== $slug ) );
 			if ( empty( $objs ) ) {
-				continue; // Drop tax if no objects left.
+				continue; // drop tax if no objects left.
 			}
 			$tax['object_types'] = $objs;
 			$new_taxes[]         = $tax;
@@ -949,39 +831,33 @@ final class CptModule implements ModuleInterface {
 			flush_rewrite_rules( false );
 		}
 
-		wp_safe_redirect(
-			add_query_arg(
-				array(
-					'page'    => 'revmura',
-					'tab'     => 'cpt',
-					'deleted' => 1,
-				),
-				admin_url( 'admin.php' )
+		wp_send_json(
+			array(
+				'ok'      => true,
+				'deleted' => $slug,
 			)
 		);
-		exit;
 	}
 
 	/**
-	 * Register CPTs and taxonomies from a snapshot array (same shape as Core exporter).
+	 * Register CPTs + taxes from a snapshot array (same shape as Core exporter).
 	 *
-	 * @param array<string,mixed> $snapshot Snapshot of schema.
+	 * @param array<string,mixed> $snapshot Snapshot.
 	 * @return void
 	 */
 	public static function register_from_snapshot( array $snapshot ): void {
 		$cpts  = isset( $snapshot['cpts'] ) && is_array( $snapshot['cpts'] ) ? $snapshot['cpts'] : array();
 		$taxes = isset( $snapshot['taxes'] ) && is_array( $snapshot['taxes'] ) ? $snapshot['taxes'] : array();
 
+		// CPTs.
 		foreach ( $cpts as $slug => $cfg ) {
-			$slug = sanitize_key( (string) $slug );
 			if ( ! is_string( $slug ) || '' === $slug || ! is_array( $cfg ) ) {
 				continue;
 			}
 
 			$label        = (string) ( $cfg['label'] ?? $slug );
 			$rewrite_slug = (string) ( $cfg['rewrite']['slug'] ?? $slug );
-
-			$supports = (array) ( $cfg['supports'] ?? array( 'title', 'editor', 'thumbnail', 'revisions' ) );
+			$supports     = (array) ( $cfg['supports'] ?? array( 'title', 'editor', 'thumbnail', 'revisions' ) );
 
 			$args = array(
 				'label'           => $label,
@@ -1002,10 +878,14 @@ final class CptModule implements ModuleInterface {
 				'show_in_menu'    => true,
 			);
 
-			register_post_type( $slug, $args );
+			$slug_sanitized = sanitize_key( (string) $slug );
+			if ( '' === $slug_sanitized ) {
+				continue;
+			}
+			register_post_type( $slug_sanitized, $args );
 		}
 
-		// Register taxonomies.
+		// Taxes.
 		foreach ( $taxes as $tax ) {
 			if ( ! is_array( $tax ) ) {
 				continue;
@@ -1015,15 +895,18 @@ final class CptModule implements ModuleInterface {
 			$tax_rew   = (string) ( $tax['rewrite']['slug'] ?? $tax_slug );
 			$tax_hier  = (bool) ( $tax['hierarchical'] ?? false );
 			$obj_types = (array) ( $tax['object_types'] ?? array() );
-			$tax_slug  = sanitize_key( $tax_slug );
-			$obj_types = array_map( 'sanitize_key', $obj_types );
 
 			if ( '' === $tax_slug || empty( $obj_types ) ) {
 				continue;
 			}
 
+			$tax_slug_sanitized = sanitize_key( $tax_slug );
+			if ( '' === $tax_slug_sanitized ) {
+				continue;
+			}
+
 			register_taxonomy(
-				$tax_slug,
+				$tax_slug_sanitized,
 				$obj_types,
 				array(
 					'label'        => $tax_label,
@@ -1038,43 +921,23 @@ final class CptModule implements ModuleInterface {
 		}
 	}
 
-	/**
-	 * Lifecycle hook: enable.
-	 *
-	 * @return void
-	 */
+	/** Lifecycle: enable. */
 	public function on_enable(): void {
-		// No-op for now.
+		// no-op for now.
 	}
 
-	/**
-	 * Lifecycle hook: disable.
-	 *
-	 * @return void
-	 */
+	/** Lifecycle: disable. */
 	public function on_disable(): void {
-		// No-op for now.
+		// no-op for now.
 	}
 
 	/**
-	 * Lifecycle hook: uninstall.
+	 * Lifecycle: uninstall.
 	 * Clears stored schema and rewrites LKG cache; flushes rewrites.
 	 *
 	 * @return void
 	 */
 	public function uninstall(): void {
-		$empty = array(
-			'schema_version' => '1.0',
-			'cpts'           => array(),
-			'taxes'          => array(),
-		);
-
-		delete_option( 'revmura_cpt_schema' );
-		do_action( 'revmura_core_committed', $empty );
-
-		if ( function_exists( 'flush_rewrite_rules' ) ) {
-			flush_rewrite_rules( false );
-		}
 		$empty = array(
 			'schema_version' => '1.0',
 			'cpts'           => array(),
