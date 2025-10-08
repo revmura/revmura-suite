@@ -5,15 +5,18 @@
     <!-- Scan the whole plugin but skip vendor -->
     <file>.</file>
     <exclude-pattern>vendor/*</exclude-pattern>
-	<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
-	<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
 
     <!-- Target PHP versions you care about -->
     <config name="testVersion" value="8.1-8.3"/>
+    <!-- Hide deprecation banner noise -->
+    <config name="show_deprecated" value="0"/>
 
     <!-- Core engines -->
     <rule ref="PHPCompatibility"/>
-    <rule ref="WordPress-Core"/>
+    <rule ref="WordPress-Core">
+        <!-- Ignore PSR-4/WordPress filename rules -->
+        <exclude name="WordPress.Files.FileName"/>
+    </rule>
 
     <!-- Keep only security-critical WP sniffs -->
     <rule ref="WordPress.Security.EscapeOutput"/>
@@ -22,24 +25,12 @@
     <rule ref="WordPress.DB.PreparedSQL"/>
 
     <!-- Downgrade everything else to not annoy you -->
-    <rule ref="Generic">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PEAR">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR1">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR2">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Zend">
-        <severity>0</severity>
-    </rule>
+    <rule ref="Generic"><severity>0</severity></rule>
+    <rule ref="PEAR"><severity>0</severity></rule>
+    <rule ref="PSR1"><severity>0</severity></rule>
+    <rule ref="PSR2"><severity>0</severity></rule>
+    <rule ref="Squiz"><severity>0</severity></rule>
+    <rule ref="Zend"><severity>0</severity></rule>
 
     <!-- Explicitly exclude the PHP 8.3-crashy sniff (safest) -->
     <exclude name="Generic.CodeAnalysis.UnconditionalIfStatement"/>
