@@ -15,6 +15,10 @@
 
 declare(strict_types=1);
 
+// Imports for internal classes.
+use Revmura\Suite\Models\ModuleRegistry;
+use Revmura\Suite\Admin\ModulesPanel;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -85,10 +89,6 @@ add_action(
 	},
 	1
 );
-
-// Imports for internal classes.
-use Revmura\Suite\Models\ModuleRegistry;
-use Revmura\Suite\Admin\ModulesPanel;
 
 // Healthy boot flag (optional for MU tools).
 add_action(
@@ -221,3 +221,13 @@ add_action( 'admin_post_revmura_modules_save', array( ModulesPanel::class, 'hand
 
 // Handle per-module data deletion.
 add_action( 'admin_post_revmura_modules_delete', array( ModulesPanel::class, 'handle_delete' ) );
+
+add_action(
+	'init',
+	static function () {
+		// Flip to false only when Suite owns these features.
+		// add_filter('revmura_multilang_enable_seo_head', '__return_false');.
+		// add_filter('revmura_multilang_enable_block', '__return_false');.
+	},
+	5
+);
