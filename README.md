@@ -1,22 +1,19 @@
 # Revmura Suite
 
-**Modules bundle** for Revmura. Load multiple features as internal modules (one plugin), with an admin **Modules** tab (provided by Revmura Manager) to enable/disable each module.
+**Modules bundle** for Revmura. Loads internal modules in one plugin and exposes a **Modules** screen (via Revmura Manager) to toggle them on/off.
 
 - Works with **Revmura Power Core** (engine) and **Revmura Manager** (UI shell)
-- PSR-4 modules under `src/Models/...`
-- Feature flags in one option: `revmura_modules_enabled`
-- Per-module version storage: `revmura_module_versions` (for future migrations)
-- Compatibility gates per module (PHP / WP / Core API)
-- Lifecycle hooks per module: `on_enable()`, `on_disable()`, `uninstall()`
-- PHPCS-clean (WordPress + PHPCompatibility), CI included
-
-> **Heads-up**: No demo module is registered by default. Add your own modules and register them (see below).
+- PSR‑4 modules under `src/Models/...`
+- Feature flags stored in `revmura_modules_enabled`
+- Per‑module version store `revmura_module_versions` (future migrations)
+- Compatibility gates (PHP / WP / Core API) per module
+- Lifecycle hooks: `boot()`, `on_enable()`, `on_disable()`, `uninstall()`
 
 ---
 
 ## Requirements
-- WordPress 6.5+
-- PHP 8.3+
+- WordPress **6.5+**
+- PHP **8.3+**
 - Active: **Revmura Power Core** and **Revmura Manager**
 
 ---
@@ -25,13 +22,11 @@
 1. Copy to `wp-content/plugins/revmura-suite`
 2. `composer install`
 3. Activate **Revmura Suite**
-4. Go to **Dashboard → Revmura → Modules** to toggle modules
+4. Open **Dashboard → Revmura → Modules**
 
 ---
 
-## Create a module
-
-1) Create a class implementing the contract:
+## Create a module (example)
 
 ```php
 <?php
@@ -50,17 +45,17 @@ final class OffersModule implements ModuleInterface {
     public function required_php_min(): string { return '8.3'; }
 
     public function boot(): void {
-        // Register CPT/Tax etc. (call Core helpers), or hook Manager panels via do_action(...)
+        // Register CPT/Tax through Core helpers; or hook Manager panels.
     }
     public function on_enable(): void {}
     public function on_disable(): void {}
-    public function uninstall(): void {
-        // Remove options/tables/meta created by this module.
-    }
+    public function uninstall(): void {}
 }
+```
 
-2) Register it in the Suite loader (e.g. inside plugins_loaded in revmura-suite.php or a dedicated bootstrap file):
+Register the module during `plugins_loaded`:
 
+```php
 use Revmura\Suite\Models\ModuleRegistry;
 use Revmura\Suite\Models\Offers\OffersModule;
 
@@ -68,43 +63,38 @@ add_action('plugins_loaded', static function (): void {
     if (!defined('REVMURA_CORE_API')) { return; } // Core required
     ModuleRegistry::register(new OffersModule());
 }, 30);
+```
 
+---
 
-The Suite will:
+## Development
 
-	* Gate by PHP/WP/Core API versions
-	* Try to boot() the module (safe try/catch)
-	* Store the module version on success
-	* Expose toggles in Revmura → Modules
-	* Call lifecycle hooks from the toggles UI
-
-
-Manager integration
-
-If modules want to add their own panel:
-
-add_action('init', static function (): void {
-    if (has_action('revmura_manager_register_panel')) {
-        do_action('revmura_manager_register_panel', [
-            'id'        => 'offers',
-            'label'     => __('Offers', 'revmura'),
-            'render_cb' => function (): void {
-                echo '<div class="wrap"><h2>' . esc_html__('Offers', 'revmura') . '</h2></div>';
-            },
-        ]);
-    }
-}, 20);
-
-
-Development
-
+```bash
+# install dev tools (PHPCS/WPCS/etc.)
 composer install
-vendor/bin/phpcbf .
-vendor/bin/phpcs -q --report=summary
 
-PHPCS runs in CI via .github/workflows/phpcs.yml.
+# auto-fix what can be fixed, then check (cross-platform)
+composer run lint:fix
+composer run lint
+```
 
+PHPCS uses the project ruleset (`phpcs.xml.dist`) and also runs in CI via `.github/workflows/phpcs.yml`.
 
-License
+**Raw commands (only if you’re not using composer scripts):**
 
-GPL-2.0-or-later
+**Windows (PowerShell):**
+```powershell
+.\vendor\bin\phpcbf.bat -p -s --standard=phpcs.xml.dist .
+.\vendor\bin\phpcs.bat  -q -p -s --standard=phpcs.xml.dist .
+```
+
+**macOS/Linux:**
+```bash
+vendor/bin/phpcbf -p -s --standard=phpcs.xml.dist .
+vendor/bin/phpcs  -q -p -s --standard=phpcs.xml.dist .
+```
+
+---
+
+## License
+GPL‑2.0‑or‑later

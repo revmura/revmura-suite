@@ -1,5 +1,6 @@
 {
   "name": "itc/revmura-suite",
+  "type": "wordpress-plugin",
   "require": {},
   "autoload": {
     "psr-4": {
@@ -7,14 +8,16 @@
     }
   },
   "require-dev": {
-    "squizlabs/php_codesniffer": "^3.10",
-    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "squizlabs/php_codesniffer": "^3.13",
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.1",
     "phpcompatibility/php-compatibility": "^9.3",
-    "wp-coding-standards/wpcs": "^3.1"
+    "wp-coding-standards/wpcs": "^3.2"
   },
   "scripts": {
-    "lint": "vendor/bin/phpcs -p -s --standard=phpcs.xml.dist .",
-    "lint:fix": "vendor/bin/phpcbf -p -s --standard=phpcs.xml.dist ."
+    "lint": "vendor/bin/phpcs -q -p -s --standard=phpcs.xml.dist .",
+    "lint:fix": "vendor/bin/phpcbf -p -s --standard=phpcs.xml.dist .",
+    "phpcs": "@lint",
+    "phpcbf": "@lint:fix"
   },
   "config": {
     "allow-plugins": {
